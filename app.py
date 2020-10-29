@@ -12,14 +12,9 @@ from flask import Flask, request
 import telegram
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-TELEBOT_TOKEN = "1395910915:AAG8iA2bYXrsQvcVPDOdIv-_Avht875vPEc"
-HEROKU_URL = "https://please-let-me-test-bot.herokuapp.com/"
-
-DBS_CLIENT_ID = "b2c8c8c5-2291-4cda-a936-ee273e812c48"
-DBS_CLIENT_SECRET = "60838a10-e083-4dd7-bd01-9dd951f25ae6"
-DBS_AUTH_URL = "https://www.dbs.com/sandbox/api/sg/v1/oauth/authorize"
-DBS_REDIRECT_URL = "{heroku_url}{telebot_token}/receive_access_token/".format(
-    heroku_url=HEROKU_URL, telebot_token=TELEBOT_TOKEN)
+from config import TELEBOT_TOKEN, HEROKU_URL, \
+    DBS_CLIENT_ID, AUTH_CODE_B64, DBS_REDIRECT_URL, \
+    DBS_AUTH_URL
 
 AUTH_TOKEN = ""
 
@@ -30,13 +25,9 @@ app = Flask(__name__)
 
 def start(chat_id):
     text = ("You need to authenticate with DBS.")
-    redirect_url = urllib.parse.quote(DBS_REDIRECT_URL, safe="")
-    
-    print(DBS_REDIRECT_URL)
-    print(redirect_url)
     
     url = "%s?client_id=%s&redirect_uri=%s&scope=Read&response_type=code&state=0399" %(
-        DBS_AUTH_URL, DBS_CLIENT_ID, redirect_url)
+        DBS_AUTH_URL, DBS_CLIENT_ID, DBS_REDIRECT_URL)
     
     keyboard = InlineKeyboardMarkup.from_button(
         InlineKeyboardButton(text="Authenticate", url=url)
@@ -63,23 +54,9 @@ def respond():
     if text == "/start":
         start(chat_id)
 
-#    else:
-#        try:
-#            # clear the message we got from any non alphabets
-#            text = re.sub(r"W", "_", text)
-#            # create the api link for the avatar based on http://avatars.adorable.io/
-#            url = "https://api.adorable.io/avatars/285/{}.png".format(text.strip())
-#            # reply with a photo to the name the user sent,
-#            # note that you can send photos by url and telegram will fetch it for you
-#            bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
-#        except Exception:
-#            # if things went wrong
-#            bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
-
     return 'ok'
 
 
-# https://please-let-me-test-bot.herokuapp.com/1395910915:AAG8iA2bYXrsQvcVPDOdIv-_Avht875vPEc/?code=Eiivy%2Bui2oY4fnxXeO3csdwHtGw%3D&state=0399
 @app.route('/{}/receive_access_token/'.format(TELEBOT_TOKEN))
 def receive_access_token():
     if "code" in request.args:
