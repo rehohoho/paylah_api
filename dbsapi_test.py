@@ -25,7 +25,7 @@ def get_access_code():
 
 def get_access_token():
 
-	access_code = "epKTwuhWIgw+OLxxc+MWAjBNQ60="
+	access_code = "XwaftpTmyltWodP/5tQhVidJnjc="
 	access_code_parsed = urllib.parse.quote(access_code, safe="")
 
 	payload = "code=%s&redirect_uri=%s&grant_type=code" % (access_code_parsed, REDIRECT_URL_PARSED)
@@ -46,7 +46,7 @@ def get_access_token():
 
 def get_refresh_code():
 	
-	refresh_token = "Z57JN80wXuo8B0NhFYDjm3FVGAaGxebscFhggh103z0="
+	refresh_token = "q3PqnH0x/WSpFZsLZ2qrA7wp5qjJoVnVL/BOsq2ujNE="
 	refresh_token_parsed = urllib.parse.quote(refresh_token, safe="")
 	
 	payload = "refresh_token=%s&grant_type=refresh_token" %refresh_token_parsed
@@ -67,5 +67,5 @@ def get_refresh_code():
 
 if __name__ == '__main__':
 	# get_access_code() // requires visiting of the webpage
-	get_access_token()	
+	get_access_token()
 	# get_refresh_code()

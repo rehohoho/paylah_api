@@ -5,34 +5,55 @@ DBS_REDIRECT_URL has to correspond to app configuration in DBS developer's porta
 """
 
 import urllib.parse
-import logging
-import re
+import requests
 
 from flask import Flask, request
 import telegram
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 from config import TELEBOT_TOKEN, HEROKU_URL, \
-    DBS_CLIENT_ID, AUTH_CODE_B64, DBS_REDIRECT_URL, \
-    DBS_AUTH_URL
+    DBS_CLIENT_ID, AUTH_CODE_B64, REDIRECT_URL_PARSED, \
+    DBS_AUTH_URL, DBS_TOKEN_URL
 
-AUTH_TOKEN = ""
 
 global bot
 bot = telegram.Bot(token=TELEBOT_TOKEN)
 app = Flask(__name__)
+ACCESS_TOKEN_JSON = {}
 
 
 def start(chat_id):
     text = ("You need to authenticate with DBS.")
     
     url = "%s?client_id=%s&redirect_uri=%s&scope=Read&response_type=code&state=0399" %(
-        DBS_AUTH_URL, DBS_CLIENT_ID, DBS_REDIRECT_URL)
+        DBS_AUTH_URL, DBS_CLIENT_ID, REDIRECT_URL_PARSED)
     
     keyboard = InlineKeyboardMarkup.from_button(
         InlineKeyboardButton(text="Authenticate", url=url)
     )
     bot.sendMessage(chat_id=chat_id, text=text, reply_markup=keyboard)
+
+
+def obtain_access_token(access_code):
+    access_code_parsed = urllib.parse.quote(access_code, safe="")
+
+    payload = "code=%s&redirect_uri=%s&grant_type=code" % (access_code_parsed, REDIRECT_URL_PARSED)
+    headers = {
+        'authorization': "Basic %s" %AUTH_CODE_B64,
+        'content-type': "application/x-www-form-urlencoded",
+        'cache-control': "no-cache"
+    }
+
+    print(payload)
+    print(headers)
+
+    response = requests.request("POST", DBS_TOKEN_URL, data=payload, headers=headers)
+    print(response)
+    print(response.text)
+
+    ACCESS_TOKEN_JSON = response.json()
+    for k, v in ACCESS_TOKEN_JSON.items():
+        print(k, v)
 
 
 @app.route('/{}'.format(TELEBOT_TOKEN), methods=['POST'])
@@ -60,11 +81,12 @@ def respond():
 @app.route('/{}/receive_access_token/'.format(TELEBOT_TOKEN))
 def receive_access_token():
     if "code" in request.args:
-        code = request.args["code"]
-
-    AUTH_TOKEN = code
-
-    return "Authentication token is {code}".format(code=code)
+        access_code = request.args["code"]
+        obtain_access_token(access_code)
+        return "Authentication token is {code}. \nResponse {response}".format(
+            code=access_code, response=ACCESS_TOKEN_JSON)
+    else:
+        return "Unable to retrieve code, no code found in returning payload."
 
 
 @app.route('/set_webhook', methods=['GET', 'POST'])
