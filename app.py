@@ -1,5 +1,7 @@
 """
-Main app to be run by Heroku 
+Main app to be run by Heroku
+
+DBS_REDIRECT_URL has to correspond to app configuration in DBS developer's portal
 """
 
 import urllib.parse
@@ -16,7 +18,10 @@ HEROKU_URL = "https://please-let-me-test-bot.herokuapp.com/"
 DBS_CLIENT_ID = "b2c8c8c5-2291-4cda-a936-ee273e812c48"
 DBS_CLIENT_SECRET = "60838a10-e083-4dd7-bd01-9dd951f25ae6"
 DBS_AUTH_URL = "https://www.dbs.com/sandbox/api/sg/v1/oauth/authorize"
-DBS_REDIRECT_URL = "{heroku_url}{telebot_token}/".format(heroku_url=HEROKU_URL, telebot_token=TELEBOT_TOKEN)
+DBS_REDIRECT_URL = "{heroku_url}{telebot_token}/receive_access_token/".format(
+    heroku_url=HEROKU_URL, telebot_token=TELEBOT_TOKEN)
+
+AUTH_TOKEN = ""
 
 global bot
 bot = telegram.Bot(token=TELEBOT_TOKEN)
@@ -41,22 +46,22 @@ def start(chat_id):
 
 @app.route('/{}'.format(TELEBOT_TOKEN), methods=['POST'])
 def respond():
-   # retrieve the message in JSON and then transform it to Telegram object
-   update = telegram.Update.de_json(request.get_json(force=True), bot)
+    print("respond")
+    # retrieve the message in JSON and then transform it to Telegram object
+    update = telegram.Update.de_json(request.get_json(force=True), bot)
 
-   chat_id = update.message.chat.id
-   msg_id = update.message.message_id
+    chat_id = update.message.chat.id
+    msg_id = update.message.message_id
 
-   # Telegram understands UTF-8, so encode text for unicode compatibility
-   text = update.message.text.encode('utf-8').decode()
-   
-   # for debugging purposes only
-   print("got text message :", text)
-   
-   # the first time you chat with the bot AKA the welcoming message
-   if text == "/start":
-       start(chat_id)
+    # Telegram understands UTF-8, so encode text for unicode compatibility
+    text = update.message.text.encode('utf-8').decode()
 
+    # for debugging purposes only
+    print("got text message :", text)
+
+    # the first time you chat with the bot AKA the welcoming message
+    if text == "/start":
+        start(chat_id)
 
 #    else:
 #        try:
@@ -71,22 +76,34 @@ def respond():
 #            # if things went wrong
 #            bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
 
-   return 'ok'
+    return 'ok'
 
-# @app.route('/{}'.format(TELEBOT_TOKEN), methods=['POST'])
+
+# https://please-let-me-test-bot.herokuapp.com/1395910915:AAG8iA2bYXrsQvcVPDOdIv-_Avht875vPEc/?code=Eiivy%2Bui2oY4fnxXeO3csdwHtGw%3D&state=0399
+@app.route('/{}/receive_access_token/'.format(TELEBOT_TOKEN))
+def receive_access_token():
+    if "code" in request.args:
+        code = request.args["code"]
+
+    AUTH_TOKEN = code
+
+    return "Authentication token is {code}".format(code=code)
+
 
 @app.route('/set_webhook', methods=['GET', 'POST'])
 def set_webhook():
-   s = bot.setWebhook('{url}{hook}'.format(url=HEROKU_URL, hook=TELEBOT_TOKEN))
-   if s:
-       return "webhook setup ok"
-   else:
-       return "webhook setup failed"
+    print("set_webhook")
+    s = bot.setWebhook('{url}{hook}'.format(url=HEROKU_URL, hook=TELEBOT_TOKEN))
+    if s:
+        return "webhook setup ok"
+    else:
+        return "webhook setup failed"
+
 
 @app.route('/')
 def index():
-   return '.'
+    return '.'
 
 
 if __name__ == '__main__':
-   app.run(threaded=True)
+    app.run(threaded=True)
