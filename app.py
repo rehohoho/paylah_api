@@ -17,9 +17,11 @@ from config import TELEBOT_TOKEN, HEROKU_URL, \
 
 
 global bot
+global access_token_json
 bot = telegram.Bot(token=TELEBOT_TOKEN)
+access_token_json = {}
 app = Flask(__name__)
-ACCESS_TOKEN_JSON = {}
+
 
 
 def start(chat_id):
@@ -51,8 +53,9 @@ def obtain_access_token(access_code):
     print(response)
     print(response.text)
 
-    ACCESS_TOKEN_JSON = response.json()
-    for k, v in ACCESS_TOKEN_JSON.items():
+    global access_token_json
+    access_token_json = response.json()
+    for k, v in access_token_json.items():
         print(k, v)
 
 
@@ -84,7 +87,7 @@ def receive_access_token():
         access_code = request.args["code"]
         obtain_access_token(access_code)
         return "Authentication token is {code}. \nResponse {response}".format(
-            code=access_code, response=ACCESS_TOKEN_JSON)
+            code=access_code, response=access_token_json)
     else:
         return "Unable to retrieve code, no code found in returning payload."
 

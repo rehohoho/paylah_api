@@ -16,3 +16,6 @@ REDIRECT_URL_PARSED = urllib.parse.quote(DBS_REDIRECT_URL, safe="")
 DBS_AUTH_URL = "https://www.dbs.com/sandbox/api/sg/v1/oauth/authorize"
 DBS_TOKEN_URL = "https://www.dbs.com/sandbox/api/sg/v1/oauth/tokens"
 DBS_REFRESH_URL = "https://www.dbs.com/sandbox/api/sg/v1/access/refresh"
+# DBS_ADHOC_TRANSFER_URL = "https://www.dbs.com/sandbox/api/sg/v1/transfers/adhocTransfer"
+DBS_PARTIES_URL = "https://www.dbs.com/sandbox/api/sg/v1/parties"
+DBS_PAYNOW_URL = "https://www.dbs.com/sandbox/api/sg/v1/transfers/payNow"
