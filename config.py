@@ -1,11 +1,11 @@
 import urllib.parse
 import base64
 
-TELEBOT_TOKEN = "1395910915:AAG8iA2bYXrsQvcVPDOdIv-_Avht875vPEc"
-HEROKU_URL = "https://please-let-me-test-bot.herokuapp.com/"
+TELEBOT_TOKEN = "<telegram-bot-token>"
+HEROKU_URL = "<heroku-app-url>"
 
-_dbs_client_secret = "60838a10-e083-4dd7-bd01-9dd951f25ae6"
-DBS_CLIENT_ID = "b2c8c8c5-2291-4cda-a936-ee273e812c48"
+_dbs_client_secret = "<dbs-client-secret>"
+DBS_CLIENT_ID = "<dbs-client-id>"
 DBS_REDIRECT_URL = "{heroku_url}{telebot_token}/receive_access_token/".format(
     heroku_url=HEROKU_URL, telebot_token=TELEBOT_TOKEN)
 

@@ -129,6 +129,7 @@ def paynow_transfer(party_id, access_token, debitAccountId, uuid):
 	print(response.text)
 
 
+# ad-hoc testing code, edit accordingly
 if __name__ == "__main__":
 	# get_access_code() // requires visiting of the webpage
 	# access_token = get_access_token(access_code=)
